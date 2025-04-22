@@ -1,0 +1,49 @@
+<div class="card">
+    <h2 class="card-title">Register</h2>
+    <form (ngSubmit)="onSubmit()" class="form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          [(ngModel)]="formData.username"
+          name="username"
+          type="text"
+          class="form-input"
+          required
+        >
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          [(ngModel)]="formData.email"
+          name="email"
+          type="email"
+          class="form-input"
+        >
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          [(ngModel)]="formData.password"
+          name="password"
+          type="password"
+          class="form-input"
+          required
+        >
+      </div>
+      <div class="form-group">
+        <label for="tenant_name">Tenant Name</label>
+        <input
+          id="tenant_name"
+          [(ngModel)]="formData.tenant_name"
+          name="tenant_name"
+          type="text"
+          class="form-input"
+        >
+      </div>
+      <button type="submit" class="submit-btn">Register</button>
+    </form>
+    <p *ngIf="error" class="error">{{ error }}</p>
+  </div>

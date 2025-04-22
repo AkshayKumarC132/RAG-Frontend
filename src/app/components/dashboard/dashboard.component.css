@@ -1,0 +1,547 @@
+:host {
+  display: block;
+  min-height: calc(100vh - 4rem);
+  background: linear-gradient(to bottom, #edf2f7, #e2e8f0);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+}
+
+.card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #2d3748;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.global-icon {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.5rem;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="gray"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM8 17h-.75a.25.25 0 0 1-.25-.25v-5.5a.25.25 0 0 1 .25-.25H8a.25.25 0 0 1 .25.25v5.5A.25.25 0 0 1 8 17zm4 0h-.75a.25.25 0 0 1-.25-.25v-9.5a.25.25 0 0 1 .25-.25h.75a.25.25 0 0 1 .25.25v9.5a.25.25 0 0 1-.25.25zm4 0h-.75a.25.25 0 0 1-.25-.25v-3.5a.25.25 0 0 1 .25-.25h.75a.25.25 0 0 1 .25.25v3.5a.25.25 0 0 1-.25.25z"/></svg>') no-repeat center;
+  background-size: contain;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.document-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.document-table th,
+.document-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.document-table th {
+  background: #f7fafc;
+  font-weight: bold;
+  color: #2d3748;
+}
+
+.document-table td {
+  color: #4a5568;
+}
+
+.file-icon {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.pdf-icon {
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-7 15a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4zm6 0a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2zm0-5a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4z"/></svg>') no-repeat center;
+  background-size: contain;
+}
+
+.txt-icon {
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="gray"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM8 17h-.75a.25.25 0 0 1-.25-.25v-5.5a.25.25 0 0 1 .25-.25H8a.25.25 0 0 1 .25.25v5.5A.25.25 0 0 1 8 17zm4 0h-.75a.25.25 0 0 1-.25-.25v-9.5a.25.25 0 0 1 .25-.25h.75a.25.25 0 0 1 .25.25v9.5a.25.25 0 0 1-.25.25zm4 0h-.75a.25.25 0 0 1-.25-.25v-3.5a.25.25 0 0 1 .25-.25h.75a.25.25 0 0 1 .25.25v3.5a.25.25 0 0 1-.25.25z"/></svg>') no-repeat center;
+  background-size: contain;
+}
+
+.chat-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="blue"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12zM7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/></svg>') no-repeat center;
+  background-size: contain;
+  cursor: pointer;
+  margin-right: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+
+.chat-icon:hover {
+  transform: scale(1.2);
+}
+
+.delete-icon:hover {
+  transform: scale(1.2);
+}
+
+.delete-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>') no-repeat center;
+  background-size: contain;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.no-documents {
+  color: #718096;
+  text-align: center;
+  padding: 1rem;
+  font-size: 1rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.file-input {
+  display: none;
+}
+
+.upload-btn {
+  background: #3182ce;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.upload-btn:hover {
+  background: #2b6cb0;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  width: 90%;
+  max-width: 600px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+}
+
+.chat-header {
+  padding: 1rem;
+  background: #3182ce;
+  color: white;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-header h3 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.close-btn {
+  margin: 1px 0.5rem;
+  background: #4a5568; /* Dark Gray */
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+}
+
+.clear-btn {
+  margin: 1px 0.5rem;
+  background: #4a5568; /* Dark Gray */
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+}
+
+/* Hover Effects */
+.close-btn:hover {
+  background: #2d3748; /* Darker Gray */
+}
+
+.clear-btn:hover {
+  background: #2d3748; /* Darker Gray */
+}
+
+/* Tooltip Text */
+.close-btn:hover::after {
+  content: 'Close Chat';
+  position: absolute;
+  background: #2d3748; /* Background for tooltip */
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 5px;
+  left: 50%; /* Center */
+  bottom: 100%; /* Position above the button */
+  transform: translateX(-50%);
+  white-space: nowrap; /* No line breaks */
+  font-size: 0.8rem; /* Smaller font size */
+}
+
+.clear-btn:hover::after {
+  content: 'Clear Chat';
+  position: absolute;
+  background: #2d3748; /* Background for tooltip */
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 5px;
+  left: 50%; /* Center */
+  bottom: 100%; /* Position above the button */
+  transform: translateX(-50%);
+  white-space: nowrap; /* No line breaks */
+  font-size: 0.8rem; /* Smaller font size */
+}
+
+/* .close-btn {
+  margin: 1px 0.5rem;
+  background: #e53e3e;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.clear-btn {
+  margin: 1px 0.5rem;
+  background: #e53e3e;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.close-btn:hover {
+  background: #c53030;
+}
+
+.clear-btn:hover {
+  background: #c53030;
+} */
+
+.chat-window {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.message {
+  max-width: 80%;
+  margin: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  position: relative;
+}
+
+.user-message {
+  background: #05a7b7;
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 2px;
+}
+
+.system-message {
+  background: #e2e8f0;
+  color: #2d3748;
+  align-self: flex-start;
+  border-bottom-left-radius: 2px;
+}
+
+.error-message {
+  background: #fed7d7;
+  color: #e53e3e;
+  align-self: flex-start;
+  border-bottom-left-radius: 2px;
+}
+
+.success-message {
+  background: #c6f6d5;
+  color: #38a169;
+  align-self: flex-start;
+  border-bottom-left-radius: 2px;
+}
+
+.message-content {
+  font-size: 1rem;
+  white-space: pre-wrap;
+}
+
+.message-timestamp {
+  font-size: 0.75rem;
+  color: #718096;
+  margin-top: 0.25rem;
+  text-align: right;
+}
+
+.chat-input {
+  display: flex;
+  padding: 1rem;
+  border-top: 1px solid #cbd5e0;
+  gap: 0.5rem;
+}
+
+.text-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 5px;
+  font-size: 1rem;
+  resize: none;
+  height: 50px;
+  transition: border-color 0.2s;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: #3182ce;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+}
+
+.send-btn {
+  background: #3182ce;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.send-btn:hover {
+  background: #2b6cb0;
+}
+
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loader {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.alert {
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.success-alert {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.error-alert {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Animation for popup */
+.animated-popup {
+  animation: fadeInDown 0.8s both;
+  border-radius: 20px;
+  padding: 1rem;
+}
+
+/* Title Styling */
+.swal-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #3b82f6; /* Tailwind Blue-500 */
+}
+
+/* Confirm Button Styling */
+.swal-confirm-button {
+  background-color: #16a34a !important; /* Green-600 */
+  border-radius: 10px !important;
+  font-size: 1rem;
+  padding: 8px 20px;
+}
+
+/* Cancel Button Styling */
+.swal-cancel-button {
+  background-color: #ef4444 !important; /* Red-500 */
+  border-radius: 10px !important;
+  font-size: 1rem;
+  padding: 8px 20px;
+}
+
+/* Fancy fade-in-down animation */
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.file-icon {
+  margin-right: 0.5rem;
+  font-size: 1.5rem;
+  color: #555;
+}
+
+.file-icon:hover {
+  transform: scale(1.2);
+  transition: transform 0.3s ease;
+}
+
+
+.file-icon {
+  margin-right: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.pdf-icon {
+  color: #e74c3c; /* Red */
+}
+
+.word-icon {
+  color: #3498db; /* Blue */
+}
+
+.excel-icon {
+  color: #2ecc71; /* Green */
+}
+
+.ppt-icon {
+  color: #e67e22; /* Orange */
+}
+
+.image-icon {
+  color: #9b59b6; /* Purple */
+}
+
+.txt-icon {
+  color: #7f8c8d; /* Grey */
+}
+
+.csv-icon {
+  color: #16a085; /* Teal */
+}
+
+.zip-icon {
+  color: #f1c40f; /* Yellow */
+}
+
+.default-icon {
+  color: #34495e; /* Dark Blue */
+}
+
+
+.predefined-questions {
+  display: flex;
+  flex-wrap: wrap; /* Allows buttons to wrap onto the next line if needed */
+  margin: 15px 0; /* Adds some space above and below the predefined questions */
+  justify-content: center; /* Centers the buttons horizontally */
+}
+
+.predefined-questions button {
+  background-color: #007BFF; /* Primary button color */
+  color: white; /* Text color */
+  border: none; /* No border */
+  border-radius: 5px; /* Slight rounding of corners */
+  padding: 10px 15px; /* Padding inside the button */
+  margin: 5px; /* Space between buttons */
+  font-size: 14px; /* Font size of button text */
+  cursor: pointer; /* Changes cursor to pointer on hover */
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.predefined-questions button:hover {
+  background-color: #0056b3; /* Darker shade for hover effect */
+}
+
+.predefined-questions button:active {
+  background-color: #004085; /* Even darker shade for active effect */
+}
+
+/* You can add more styles below to customize further based on your design */

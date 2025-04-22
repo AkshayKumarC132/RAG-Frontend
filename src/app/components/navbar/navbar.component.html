@@ -1,0 +1,15 @@
+<nav class="navbar">
+    <div class="container">
+      <a href="/" class="logo">RAG</a>
+      <div class="nav-links">
+        <ng-container *ngIf="authService.token$ | async; else loggedOut">
+          <a href="/dashboard" class="nav-link">Dashboard</a>
+          <button (click)="logout()" class="logout-btn">Logout</button>
+        </ng-container>
+        <ng-template #loggedOut>
+          <a href="/login" class="nav-link">Login</a>
+          <a href="/register" class="nav-link">Register</a>
+        </ng-template>
+      </div>
+    </div>
+  </nav>
