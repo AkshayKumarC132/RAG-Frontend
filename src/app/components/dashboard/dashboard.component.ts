@@ -46,6 +46,7 @@ export class DashboardComponent implements OnInit {
     'Summarize the content',
     'What are the key points?',
     'Give me an overview'
+    // 'Generate a Email Template based on the content', 
   ];
 
   constructor(
@@ -165,7 +166,7 @@ export class DashboardComponent implements OnInit {
     type: 'user' | 'system' | 'error' | 'success',
     content: string
   ) {
-    const timestamp = new Date().toISOString(); // for full YYYY-MM-DDTHH:mm:ssZ format
+    const timestamp = new Date().toLocaleTimeString(); // for full YYYY-MM-DDTHH:mm:ssZ format
     this.chatMessages.push({ type, content, timestamp });
     // Auto-scroll to bottom
     setTimeout(() => {
