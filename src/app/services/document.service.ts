@@ -39,7 +39,7 @@ export class DocumentService {
 
   listDocuments(): Observable<any> {
     const token = localStorage.getItem('authToken'); // Fetch token here
-    return this.http.get(`${this.apiUrl}/documents/${token}/`);
+    return this.http.get(`${this.apiUrl}/list-documents/${token}/`);
   }
 
   getChatHistory(vectorId: string) {
