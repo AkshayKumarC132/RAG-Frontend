@@ -62,4 +62,17 @@ export class DocumentService {
       `${this.apiUrl}/chat-history/${token}/${vectorId}/`
     );
   }
+
+  askMultiFileQuestion(question: {
+    question: string;
+    vector_ids: string[];
+  }): Observable<any> {
+    const token = localStorage.getItem('authToken'); // Fetch token here
+    return this.http.post(`${this.apiUrl}/multifile-ask/${token}/`, question);
+  }
+  
+  askGlobalQuestion(question: { question: string }): Observable<any> {
+    const token = localStorage.getItem('authToken'); // Fetch token here
+    return this.http.post(`${this.apiUrl}/global-ask/${token}/`, question);
+  }
 }

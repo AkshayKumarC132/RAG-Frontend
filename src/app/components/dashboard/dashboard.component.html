@@ -14,34 +14,57 @@
   <div class="card">
     <h3 class="card-title"><span class="global-icon"></span> My Documents</h3>
     <div *ngIf="documents.length > 0; else noDocuments" class="table-container">
+      <!-- Document Search Bar -->
+      <div class="search-bar">
+        <input type="text" [(ngModel)]="searchTerm" placeholder="Search documents...">
+      </div>
+      <div class="action-buttons">
+        <button (click)="startGlobalChat()" class="upload-btn">🌍 Global Chat</button>
+        <button (click)="startMultiFileChat()" class="upload-btn">📂 Multi-File Chat</button>
+      </div>
+      <!-- Multi-File Selection Modal -->
+      <div *ngIf="showFileSelectorModal" class="modal">
+        <div class="modal-content file-selector-modal">
+          <div class="chat-header">
+            <h3>Select Files for Multi-File Chat</h3>
+            <button (click)="cancelMultiFileChat()" class="close-btn" title="Cancel"><i class="fa fa-times"></i></button>
+          </div>
+          <!-- Modal Search Bar -->
+          <div class="search-bar">
+            <input type="text" [(ngModel)]="modalSearchTerm" placeholder="Search files...">
+            <button (click)="selectAllFiles()" class="upload-btn">Select All</button>
+            <button (click)="clearAllFiles()" class="upload-btn">Clear All</button>
+          </div>
+          <div class="file-selector-list">
+            <label *ngFor="let doc of filteredModalDocuments" class="file-item">
+              <input type="checkbox" 
+                     [checked]="selectedFilesForMultiChat.includes(doc)"
+                     (change)="toggleFileSelection(doc)">
+              {{ doc.title }} ({{ doc.extension.toUpperCase() }})
+            </label>
+          </div>
+          <!-- Action Buttons inside Modal -->
+          <div class="action-buttons">
+            <!-- <button (click)="selectAllFiles()" class="upload-btn">Select All</button>
+            <button (click)="clearAllFiles()" class="upload-btn">Clear All</button> -->
+            <button (click)="confirmMultiFileChat()" class="upload-btn">✅ Start Chat</button>
+          </div>
+        </div>
+      </div>
       <table class="document-table">
         <thead>
           <tr>
-            <!-- <th>ID</th> -->
             <th>Name</th>
             <th>Extension</th>
             <th>Uploaded At</th>
-            <!-- <th>Vector ID</th> -->
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let doc of documents">
-            <!-- <td>{{ doc.id }}</td> -->
+          <tr *ngFor="let doc of filteredDocuments">
             <td>{{ doc.title }}</td>
-            <!-- <td>
-              <span class="file-icon" [ngClass]="{
-                'pdf-icon': doc.extension === 'pdf',
-                'txt-icon': doc.extension === 'txt'
-              }"></span>
-              {{ doc.title }}
-            </td> -->
-            <td>
-              <!-- <i [ngClass]="getFileIconClass(doc.extension)" class="file-icon"></i> -->
-              {{ doc.extension.toUpperCase() }}
-            </td>
+            <td>{{ doc.extension.toUpperCase() }}</td>
             <td>{{ doc.uploaded_at }}</td>
-            <!-- <td>{{ doc.vector_id }}</td> -->
             <td>
               <button (click)="openChatbot(doc)" class="chat-icon" title="Chat about this document"></button>
               <button (click)="deleteDocument(doc)" class="delete-icon" title="Delete document"></button>
@@ -64,12 +87,13 @@
     </div>
   </div>
 
-  <!-- Chatbot Modal
+  <!-- Chatbot Modal -->
   <div *ngIf="showChatbot" class="modal">
     <div class="modal-content">
       <div class="chat-header">
         <h3>Document Assistant: {{ selectedDocumentTitle || 'General Chat' }}</h3>
-        <button (click)="closeChatbot()" class="close-btn">Close</button>
+        <button (click)="clearChat()" class="clear-btn" title="Clear Chat"><i class="fa fa-eraser"></i></button>
+        <button (click)="closeChatbot()" class="close-btn" title="Close Chat"><i class="fa fa-times"></i></button>
       </div>
       <div class="chat-window">
         <div *ngFor="let message of chatMessages" class="message" [ngClass]="{
@@ -82,6 +106,11 @@
           <div class="message-timestamp">{{ message.timestamp }}</div>
         </div>
       </div>
+      <div class="predefined-questions">
+        <button *ngFor="let question of predefinedQuestions" (click)="setPredefinedQuestion(question)">
+          {{ question }}
+        </button>
+      </div>
       <div class="chat-input">
         <textarea
           [(ngModel)]="chatInput"
@@ -92,45 +121,5 @@
         <button (click)="handleChatInput()" class="send-btn">Send</button>
       </div>
     </div>
-  </div> -->
-
-  <!-- Chatbot Modal -->
-<div *ngIf="showChatbot" class="modal">
-  <div class="modal-content">
-    <div class="chat-header">
-      <h3>Document Assistant: {{ selectedDocumentTitle || 'General Chat' }}</h3>
-      <button (click)="clearChat()" class="clear-btn" title="Clear Chat"><i class="fa fa-eraser"></i> <!-- Clear Icon --></button>
-      <button (click)="closeChatbot()" class="close-btn" title="Close Chat"><i class="fa fa-times"></i> <!-- Close Icon --></button>
-    </div>
-
-    <div class="chat-window">
-      <div *ngFor="let message of chatMessages" class="message" [ngClass]="{
-        'user-message': message.type === 'user',
-        'system-message': message.type === 'system',
-        'error-message': message.type === 'error',
-        'success-message': message.type === 'success'
-      }">
-        <div class="message-content">{{ message.content }}</div>
-        <div class="message-timestamp">{{ message.timestamp }}</div>
-      </div>
-    </div>
-
-    <div class="predefined-questions">
-      <button *ngFor="let question of predefinedQuestions" (click)="setPredefinedQuestion(question)">
-        {{ question }}
-      </button>
-    </div>
-
-    <div class="chat-input">
-      <textarea
-        [(ngModel)]="chatInput"
-        (keypress)="onKeyPress($event)"
-        placeholder="Ask a question..."
-        class="text-input"
-      ></textarea>
-      <button (click)="handleChatInput()" class="send-btn">Send</button>
-    </div>
   </div>
-</div>
-
 </div>

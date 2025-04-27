@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { DocumentService } from '../../services/document.service';
-import Swal from 'sweetalert2'; // Add at the top
+import Swal from 'sweetalert2'; // Alerts
 
 interface ChatMessage {
   type: 'user' | 'system' | 'error' | 'success';
@@ -34,6 +34,15 @@ export class DashboardComponent implements OnInit {
   showChatbot: boolean = false;
   selectedDocumentTitle: string | null = null;
   selectedDocumentVectorId: string | null = null;
+  selectedMode: 'single' | 'multi' | 'global' = 'single'; // 🚀 New Mode Handling
+  selectedVectorIds: string[] = []; // 🚀 For multi-file mode
+
+  multiFileSelectionMode: boolean = false;
+  selectedFilesForMultiChat: Document[] = [];
+  showFileSelectorModal: boolean = false;
+
+  searchTerm: string = ''; // For main dashboard search
+  modalSearchTerm: string = ''; // For file selector modal search
 
   isLoading: boolean = false;
   successMessage: string = '';
@@ -41,12 +50,10 @@ export class DashboardComponent implements OnInit {
 
   selectedDocumentId: string = '';
 
-  // Define predefined questions
   predefinedQuestions: string[] = [
     'Summarize the content',
     'What are the key points?',
-    'Give me an overview'
-    // 'Generate a Email Template based on the content', 
+    'Give me an overview',
   ];
 
   constructor(
@@ -88,6 +95,26 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  get filteredDocuments() {
+    return this.documents.filter((doc) =>
+      doc.title.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+  }
+
+  get filteredModalDocuments() {
+    return this.documents.filter((doc) =>
+      doc.title.toLowerCase().includes(this.modalSearchTerm.toLowerCase())
+    );
+  }
+
+  selectAllFiles() {
+    this.selectedFilesForMultiChat = [...this.filteredModalDocuments];
+  }
+
+  clearAllFiles() {
+    this.selectedFilesForMultiChat = [];
+  }
+
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0];
     if (this.selectedFile) {
@@ -96,18 +123,13 @@ export class DashboardComponent implements OnInit {
       this.errorMessage = '';
       this.documentService.ingestDocument(this.selectedFile).subscribe({
         next: (res) => {
-          // alert(res.message); // For example, displaying an alert with the message
-
-          // this.selectedFile = null;
-          // this.ngOnInit(); // Refresh document list
           this.isLoading = false;
           this.successMessage =
             res.message || 'Document uploaded successfully!';
           this.selectedFile = null;
-          this.fetchDocuments(); // Refresh document list
+          this.fetchDocuments();
           setTimeout(() => (this.successMessage = ''), 3000);
         },
-
         error: (err) => {
           this.isLoading = false;
           this.errorMessage = err.error?.error || 'Failed to upload document';
@@ -128,14 +150,14 @@ export class DashboardComponent implements OnInit {
       confirmButtonText: 'Yes, delete it!',
       cancelButtonText: 'Cancel',
       customClass: {
-        popup: 'animated-popup', // 👈 apply custom animation
+        popup: 'animated-popup',
         title: 'swal-title',
         confirmButton: 'swal-confirm-button',
         cancelButton: 'swal-cancel-button',
       },
       backdrop: `
         rgba(0,0,123,0.4)
-        url("https://i.gifer.com/ZZ5H.gif")  // Optional background GIF
+        url("https://i.gifer.com/ZZ5H.gif")
         left top
         no-repeat
       `,
@@ -166,9 +188,8 @@ export class DashboardComponent implements OnInit {
     type: 'user' | 'system' | 'error' | 'success',
     content: string
   ) {
-    const timestamp = new Date().toLocaleTimeString(); // for full YYYY-MM-DDTHH:mm:ssZ format
+    const timestamp = new Date().toLocaleTimeString();
     this.chatMessages.push({ type, content, timestamp });
-    // Auto-scroll to bottom
     setTimeout(() => {
       const chatWindow = document.querySelector('.chat-window');
       if (chatWindow) chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -179,83 +200,151 @@ export class DashboardComponent implements OnInit {
     this.showChatbot = true;
     this.selectedDocumentTitle = document.title;
     this.selectedDocumentId = document.vector_id;
-
-    // Clear any previous chat when opening
+    this.selectedMode = 'single'; // Single file chat
     this.chatMessages = [];
 
-    // Prepare default messages
     const welcomeMessage = `👋 Welcome! You are chatting about: "${this.selectedDocumentTitle}".`;
-    // Add default messages to chat
-    
 
-    // Fetch old chat history
     this.documentService.getChatHistory(this.selectedDocumentId).subscribe({
       next: (response) => {
         if (response.history && response.history.length > 0) {
-        // this.chatMessages = response.history || [];
-        this.chatMessages = [...this.chatMessages, ...(response.history || [])];
-        }
-        else{
+          this.chatMessages = [
+            ...this.chatMessages,
+            ...(response.history || []),
+          ];
+        } else {
           this.addChatMessage('system', welcomeMessage);
         }
       },
       error: () => {
         this.chatMessages = [];
+        this.addChatMessage('system', welcomeMessage);
       },
     });
   }
 
-  setPredefinedQuestion(question: string) {
-    this.chatInput = question;  // Set the input field to the selected question
+  startGlobalChat() {
+    this.showChatbot = true;
+    this.selectedMode = 'global';
+    this.selectedDocumentTitle = '🌍 Global Chat';
+    this.selectedDocumentId = '';
+    this.chatMessages = [];
+    this.addChatMessage(
+      'system',
+      '👋 Welcome to Global Chat across all documents.'
+    );
   }
 
-
-  closeChatbot() {
-    this.showChatbot = false;
-
-    // Save chat history when closing
-    if (this.selectedDocumentId && this.chatMessages.length > 0) {
-      this.documentService
-        .saveChatHistory(this.selectedDocumentId, this.chatMessages)
-        .subscribe();
+  startMultiFileChat() {
+    if (this.documents.length > 0) {
+      this.showFileSelectorModal = true; // ➔ Open modal to select files
+    } else {
+      this.errorMessage = 'No documents available for multi-file chat.';
     }
+  }
+
+  toggleFileSelection(doc: Document) {
+    const index = this.selectedFilesForMultiChat.findIndex(
+      (d) => d.vector_id === doc.vector_id
+    );
+    if (index > -1) {
+      this.selectedFilesForMultiChat.splice(index, 1);
+    } else {
+      this.selectedFilesForMultiChat.push(doc);
+    }
+  }
+
+  confirmMultiFileChat() {
+    if (this.selectedFilesForMultiChat.length === 0) {
+      alert('Please select at least one document.');
+      return;
+    }
+    this.showFileSelectorModal = false;
+    this.showChatbot = true;
+    this.selectedMode = 'multi';
+    this.selectedDocumentTitle = '📂 Multi-File Chat';
+    this.selectedVectorIds = this.selectedFilesForMultiChat.map(
+      (doc) => doc.vector_id
+    );
+    this.chatMessages = [];
+    this.addChatMessage(
+      'system',
+      `👋 Multi-File Chat started with ${this.selectedVectorIds.length} documents.`
+    );
+  }
+
+  cancelMultiFileChat() {
+    this.showFileSelectorModal = false;
+    this.selectedFilesForMultiChat = [];
   }
 
   handleChatInput() {
     if (!this.chatInput.trim()) return;
 
     const input = this.chatInput.trim();
-    const loadingMessageId = this.chatMessages.length;
     this.addChatMessage('user', input);
     this.chatInput = '';
-    //   // Treat as a normal question
-    const questionData: any = {
-      question: input,
-      vector_id: this.selectedDocumentId, // Always use selectedDocumentId
-    };
 
-    // Attach the selected document vector ID dynamically
-    if (this.selectedDocumentVectorId) {
-      questionData.vector_id = this.selectedDocumentVectorId;
+    let apiCall;
+
+    if (this.selectedMode === 'single') {
+      apiCall = this.documentService.askQuestion({
+        question: input,
+        vector_id: this.selectedDocumentId,
+      });
+    } else if (this.selectedMode === 'multi') {
+      apiCall = this.documentService.askMultiFileQuestion({
+        question: input,
+        vector_ids: this.selectedVectorIds,
+      });
+    } else if (this.selectedMode === 'global') {
+      apiCall = this.documentService.askGlobalQuestion({
+        question: input,
+      });
     }
 
-    this.documentService.askQuestion(questionData).subscribe({
-      next: (res) => this.addChatMessage('system', res.answer),
-      error: (err) =>
-        this.addChatMessage(
-          'error',
-          err.error?.error || 'Failed to get answer'
-        ),
-    });
+    if (apiCall) {
+      this.isLoading = true;
+      apiCall.subscribe({
+        next: (res) => {
+          this.isLoading = false;
+          this.addChatMessage('system', res.answer);
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.addChatMessage(
+            'error',
+            err.error?.error || 'Failed to get answer'
+          );
+        },
+      });
+    }
+  }
+
+  closeChatbot() {
+    this.showChatbot = false;
+    if (
+      this.selectedMode === 'single' &&
+      this.selectedDocumentId &&
+      this.chatMessages.length > 0
+    ) {
+      this.documentService
+        .saveChatHistory(this.selectedDocumentId, this.chatMessages)
+        .subscribe();
+    }
   }
 
   clearChat() {
     this.chatMessages = [];
-    if (this.selectedDocumentId) {
+    if (this.selectedMode === 'single' && this.selectedDocumentId) {
       this.documentService
         .clearChatHistory(this.selectedDocumentId)
         .subscribe();
     }
+  }
+
+  setPredefinedQuestion(question: string) {
+    this.chatInput = question;
   }
 
   onKeyPress(event: KeyboardEvent) {
