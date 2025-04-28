@@ -155,12 +155,12 @@ export class DashboardComponent implements OnInit {
         confirmButton: 'swal-confirm-button',
         cancelButton: 'swal-cancel-button',
       },
-      backdrop: `
-        rgba(0,0,123,0.4)
-        url("https://i.gifer.com/ZZ5H.gif")
-        left top
-        no-repeat
-      `,
+      // backdrop: `
+      //   rgba(0,0,123,0.4)
+      //   url("https://i.gifer.com/ZZ5H.gif")
+      //   left top
+      //   no-repeat
+      // `,
     }).then((result) => {
       if (result.isConfirmed) {
         this.isLoading = true;
