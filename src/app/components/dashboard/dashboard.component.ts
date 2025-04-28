@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
@@ -27,6 +27,7 @@ interface Document {
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
+  @ViewChild('fileInput', { static: false }) fileInput!: ElementRef;
   selectedFile: File | null = null;
   chatInput: string = '';
   chatMessages: ChatMessage[] = [];
@@ -49,6 +50,11 @@ export class DashboardComponent implements OnInit {
   errorMessage: string = '';
 
   selectedDocumentId: string = '';
+
+  alerts: any[] = [];
+  showAlertsPopup: boolean = false;
+
+
 
   predefinedQuestions: string[] = [
     'Summarize the content',
@@ -115,29 +121,58 @@ export class DashboardComponent implements OnInit {
     this.selectedFilesForMultiChat = [];
   }
 
-  onFileSelected(event: any) {
-    this.selectedFile = event.target.files[0];
-    if (this.selectedFile) {
-      this.isLoading = true;
-      this.successMessage = '';
-      this.errorMessage = '';
-      this.documentService.ingestDocument(this.selectedFile).subscribe({
-        next: (res) => {
-          this.isLoading = false;
-          this.successMessage =
-            res.message || 'Document uploaded successfully!';
-          this.selectedFile = null;
-          this.fetchDocuments();
-          setTimeout(() => (this.successMessage = ''), 3000);
-        },
-        error: (err) => {
-          this.isLoading = false;
-          this.errorMessage = err.error?.error || 'Failed to upload document';
-          setTimeout(() => (this.errorMessage = ''), 3000);
-        },
-      });
-    }
+
+onFileSelected(event: any) {
+  this.selectedFile = event.target.files[0];
+  if (this.selectedFile) {
+    this.isLoading = true;
+    this.documentService.ingestDocument(this.selectedFile).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        this.selectedFile = null;
+        this.fetchDocuments();
+
+        // Resetting the file input
+        this.resetFileInput();
+        
+        // Display success toast notification
+        Swal.fire({
+          position: 'top-end',
+          icon: 'success',
+          title: res.message || 'Document uploaded successfully!',
+          toast: true,
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+        });
+        
+      },
+      error: (err) => {
+        this.isLoading = false;
+
+        // Resetting the file input
+        this.resetFileInput();
+        
+        // Display error toast notification
+        Swal.fire({
+          position: 'top-end',
+          icon: 'error',
+          title: err.error?.error || 'Failed to upload document',
+          toast: true,
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+        });
+      },
+    });
   }
+}
+
+resetFileInput() {
+  // Reset the file input element
+  this.fileInput.nativeElement.value = '';
+}
+
 
   deleteDocument(document: Document) {
     Swal.fire({
@@ -204,6 +239,16 @@ export class DashboardComponent implements OnInit {
     this.chatMessages = [];
 
     const welcomeMessage = `👋 Welcome! You are chatting about: "${this.selectedDocumentTitle}".`;
+
+    this.documentService.getDocumentAlerts(this.selectedDocumentId).subscribe({
+      next: (res) => {
+        this.alerts = res.alerts || [];
+      },
+      error: () => {
+        this.alerts = [];
+      }
+    });
+    
 
     this.documentService.getChatHistory(this.selectedDocumentId).subscribe({
       next: (response) => {

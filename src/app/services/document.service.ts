@@ -75,4 +75,9 @@ export class DocumentService {
     const token = localStorage.getItem('authToken'); // Fetch token here
     return this.http.post(`${this.apiUrl}/global-ask/${token}/`, question);
   }
+
+  getDocumentAlerts(vectorId: string) {
+    return this.http.get<any>(`${this.apiUrl}/document-alerts/${vectorId}/`);
+  }
+  
 }

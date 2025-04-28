@@ -78,7 +78,8 @@
     </ng-template>
     <div class="action-buttons">
       <input
-        type="file"
+        type="file" 
+        #fileInput
         (change)="onFileSelected($event)"
         class="file-input"
         id="file-upload"
@@ -88,38 +89,66 @@
   </div>
 
   <!-- Chatbot Modal -->
-  <div *ngIf="showChatbot" class="modal">
-    <div class="modal-content">
-      <div class="chat-header">
-        <h3>Document Assistant: {{ selectedDocumentTitle || 'General Chat' }}</h3>
+<div *ngIf="showChatbot" class="modal">
+
+  <div class="modal-content">
+
+    <div class="chat-header">
+      <h3>Document Assistant: {{ selectedDocumentTitle || 'General Chat' }}</h3>
+    
+      <div class="header-buttons">
+        <div class="alert-icon-wrapper" (mouseenter)="showAlertsPopup = true" (mouseleave)="showAlertsPopup = false">
+          <i class="fa fa-bell alert-icon" title="View Alerts"></i>
+    
+          <!-- Popup -->
+          <div *ngIf="showAlertsPopup" class="alerts-popup">
+            <h4>🚨 Alerts</h4>
+            <div *ngIf="alerts.length > 0; else noAlertsFound">
+              <div *ngFor="let alert of alerts" class="alert-popup-item">
+                <strong>{{ alert.keyword | titlecase }}</strong>: {{ alert.snippet }}
+              </div>
+            </div>
+            <ng-template #noAlertsFound>
+              <div class="no-alerts">No critical alerts found.</div>
+            </ng-template>
+          </div>
+    
+        </div>
+    
         <button (click)="clearChat()" class="clear-btn" title="Clear Chat"><i class="fa fa-eraser"></i></button>
         <button (click)="closeChatbot()" class="close-btn" title="Close Chat"><i class="fa fa-times"></i></button>
       </div>
-      <div class="chat-window">
-        <div *ngFor="let message of chatMessages" class="message" [ngClass]="{
-          'user-message': message.type === 'user',
-          'system-message': message.type === 'system',
-          'error-message': message.type === 'error',
-          'success-message': message.type === 'success'
-        }">
-          <div class="message-content">{{ message.content }}</div>
-          <div class="message-timestamp">{{ message.timestamp }}</div>
-        </div>
-      </div>
-      <div class="predefined-questions">
-        <button *ngFor="let question of predefinedQuestions" (click)="setPredefinedQuestion(question)">
-          {{ question }}
-        </button>
-      </div>
-      <div class="chat-input">
-        <textarea
-          [(ngModel)]="chatInput"
-          (keypress)="onKeyPress($event)"
-          placeholder="Ask a question..."
-          class="text-input"
-        ></textarea>
-        <button (click)="handleChatInput()" class="send-btn">Send</button>
+    </div>    
+
+    <div class="chat-window">
+      <div *ngFor="let message of chatMessages" class="message" [ngClass]="{
+        'user-message': message.type === 'user',
+        'system-message': message.type === 'system',
+        'error-message': message.type === 'error',
+        'success-message': message.type === 'success'
+      }">
+        <div class="message-content">{{ message.content }}</div>
+        <div class="message-timestamp">{{ message.timestamp }}</div>
       </div>
     </div>
+
+    <div class="predefined-questions">
+      <button *ngFor="let question of predefinedQuestions" (click)="setPredefinedQuestion(question)">
+        {{ question }}
+      </button>
+    </div>
+
+    <div class="chat-input">
+      <textarea
+        [(ngModel)]="chatInput"
+        (keypress)="onKeyPress($event)"
+        placeholder="Ask a question..."
+        class="text-input"
+      ></textarea>
+      <button (click)="handleChatInput()" class="send-btn">Send</button>
+    </div>
+
   </div>
+
+</div>
 </div>
