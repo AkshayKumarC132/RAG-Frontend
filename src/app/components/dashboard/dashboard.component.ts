@@ -280,46 +280,71 @@ export class DashboardComponent implements OnInit {
 
   handleChatInput() {
     if (!this.chatInput.trim()) return;
-
+  
     const input = this.chatInput.trim();
-    this.addChatMessage('user', input);
+    const timestamp = new Date().toLocaleTimeString();
+  
+    const userMessage: ChatMessage = {
+      type: 'user',
+      content: input,
+      timestamp
+    };
+    
+    this.chatMessages.push(userMessage);
     this.chatInput = '';
-
+  
     let apiCall;
-
+  
+    // Memory window: Pick last 5 messages (alternating user-system)
+    const memoryWindow = 5;
+    const chatHistory = this.chatMessages
+      .slice(-memoryWindow * 2)  // each turn = user + system
+      .filter(m => m.type === 'user' || m.type === 'system')
+      .map(m => ({ role: m.type === 'user' ? 'user' : 'assistant', content: m.content }));
+  
+    // Prepare body depending on mode
+    const body: any = {
+      question: input,
+      chat_history: chatHistory
+    };
+  
     if (this.selectedMode === 'single') {
-      apiCall = this.documentService.askQuestion({
-        question: input,
-        vector_id: this.selectedDocumentId,
-      });
+      body.vector_id = this.selectedDocumentId;
+      apiCall = this.documentService.askQuestion(body);
+  
     } else if (this.selectedMode === 'multi') {
-      apiCall = this.documentService.askMultiFileQuestion({
-        question: input,
-        vector_ids: this.selectedVectorIds,
-      });
+      body.vector_ids = this.selectedVectorIds;
+      apiCall = this.documentService.askMultiFileQuestion(body);
+  
     } else if (this.selectedMode === 'global') {
-      apiCall = this.documentService.askGlobalQuestion({
-        question: input,
-      });
+      apiCall = this.documentService.askGlobalQuestion(body);
     }
-
+  
     if (apiCall) {
       this.isLoading = true;
       apiCall.subscribe({
         next: (res) => {
           this.isLoading = false;
-          this.addChatMessage('system', res.answer);
+          const systemMessage: ChatMessage = {
+            type: 'system',
+            content: res.answer,
+            timestamp: new Date().toLocaleTimeString()
+          };
+          this.chatMessages.push(systemMessage);
         },
         error: (err) => {
           this.isLoading = false;
-          this.addChatMessage(
-            'error',
-            err.error?.error || 'Failed to get answer'
-          );
+          const errorMessage: ChatMessage = {
+            type: 'error',
+            content: err.error?.error || 'Failed to get answer',
+            timestamp: new Date().toLocaleTimeString()
+          };
+          this.chatMessages.push(errorMessage);
         },
       });
     }
   }
+  
 
   closeChatbot() {
     this.showChatbot = false;
