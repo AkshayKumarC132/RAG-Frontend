@@ -81,5 +81,28 @@ export class DocumentService {
   getDocumentAlerts(vectorId: string) {
     return this.http.get<any>(`${this.apiUrl}/document-alerts/${vectorId}/`);
   }
+
+
+  saveMultiChatHistory(vector_ids: string[], history: any[]) {
+    const token = localStorage.getItem('authToken'); // Fetch token here
+    return this.http.post<any>(`${this.apiUrl}/chat-history-multifile/${token}/`, {
+      vector_ids,
+      history
+    });
+  }
+  
+  getMultiChatHistory(session_id: string) {
+    const token = localStorage.getItem('authToken'); // Fetch token here
+    return this.http.get<any>(`${this.apiUrl}/chat-history-multifile/${token}/`, {
+      params: { session_id }
+    });
+  }
+  
+  clearMultiChatHistory(session_id: string) {
+    const token = localStorage.getItem('authToken'); // Fetch token here
+    return this.http.delete<any>(`${this.apiUrl}/chat-history-multifile/${token}/`, {
+      params: { session_id }
+    });
+  }  
   
 }

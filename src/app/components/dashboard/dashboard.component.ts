@@ -54,7 +54,7 @@ export class DashboardComponent implements OnInit {
   alerts: any[] = [];
   showAlertsPopup: boolean = false;
 
-
+  multiSessionId: string = '';
 
   predefinedQuestions: string[] = [
     'Summarize the content',
@@ -122,56 +122,56 @@ export class DashboardComponent implements OnInit {
   }
 
 
-onFileSelected(event: any) {
-  this.selectedFile = event.target.files[0];
-  if (this.selectedFile) {
-    this.isLoading = true;
-    this.documentService.ingestDocument(this.selectedFile).subscribe({
-      next: (res) => {
-        this.isLoading = false;
-        this.selectedFile = null;
-        this.fetchDocuments();
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0];
+    if (this.selectedFile) {
+      this.isLoading = true;
+      this.documentService.ingestDocument(this.selectedFile).subscribe({
+        next: (res) => {
+          this.isLoading = false;
+          this.selectedFile = null;
+          this.fetchDocuments();
 
-        // Resetting the file input
-        this.resetFileInput();
-        
-        // Display success toast notification
-        Swal.fire({
-          position: 'top-end',
-          icon: 'success',
-          title: res.message || 'Document uploaded successfully!',
-          toast: true,
-          showConfirmButton: false,
-          timer: 3000,
-          timerProgressBar: true,
-        });
-        
-      },
-      error: (err) => {
-        this.isLoading = false;
+          // Resetting the file input
+          this.resetFileInput();
 
-        // Resetting the file input
-        this.resetFileInput();
-        
-        // Display error toast notification
-        Swal.fire({
-          position: 'top-end',
-          icon: 'error',
-          title: err.error?.error || 'Failed to upload document',
-          toast: true,
-          showConfirmButton: false,
-          timer: 3000,
-          timerProgressBar: true,
-        });
-      },
-    });
+          // Display success toast notification
+          Swal.fire({
+            position: 'top-end',
+            icon: 'success',
+            title: res.message || 'Document uploaded successfully!',
+            toast: true,
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+          });
+
+        },
+        error: (err) => {
+          this.isLoading = false;
+
+          // Resetting the file input
+          this.resetFileInput();
+
+          // Display error toast notification
+          Swal.fire({
+            position: 'top-end',
+            icon: 'error',
+            title: err.error?.error || 'Failed to upload document',
+            toast: true,
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+          });
+        },
+      });
+    }
   }
-}
 
-resetFileInput() {
-  // Reset the file input element
-  this.fileInput.nativeElement.value = '';
-}
+  resetFileInput() {
+    // Reset the file input element
+    this.fileInput.nativeElement.value = '';
+  }
 
 
   deleteDocument(document: Document) {
@@ -229,8 +229,29 @@ resetFileInput() {
       const chatWindow = document.querySelector('.chat-window');
       if (chatWindow) chatWindow.scrollTop = chatWindow.scrollHeight;
     }, 0);
+
+  // 🔄 Auto-save for user/system/success messages (skip 'error')
+  if (type === 'user' || type === 'system' || type === 'success') {
+    this.autoSaveChat();
+  }
   }
 
+  autoSaveChat() {
+    if (this.chatMessages.length === 0) return;
+  
+    if (this.selectedMode === 'single' && this.selectedDocumentId) {
+      this.documentService
+        .saveChatHistory(this.selectedDocumentId, this.chatMessages)
+        .subscribe();
+  
+    } else if (this.selectedMode === 'multi' && this.multiSessionId) {
+      this.documentService
+        .saveMultiChatHistory(this.selectedVectorIds, this.chatMessages)
+        .subscribe();
+    }
+  }
+
+  
   openChatbot(document: any) {
     this.showChatbot = true;
     this.selectedDocumentTitle = document.title;
@@ -246,7 +267,7 @@ resetFileInput() {
       },
       error: () => {
         this.alerts = [];
-      }
+      },
     });
     
 
@@ -312,10 +333,52 @@ resetFileInput() {
       (doc) => doc.vector_id
     );
     this.chatMessages = [];
-    this.addChatMessage(
-      'system',
-      `👋 Multi-File Chat started with ${this.selectedVectorIds.length} documents.`
-    );
+
+    this.documentService
+      .saveMultiChatHistory(this.selectedVectorIds, [])
+      .subscribe({
+        next: (res) => {
+          this.multiSessionId = res.session_id;
+
+          const resumeMessage =
+            res.is_new === false
+              ? '👋 Resuming previous multi-file chat session.'
+              : `👋 Multi-File Chat started with ${this.selectedVectorIds.length} documents.`;
+
+          this.documentService
+            .getMultiChatHistory(this.multiSessionId)
+            .subscribe({
+              next: (response) => {
+                this.chatMessages = [...(response.history || [])];
+
+                const alreadyHasResumeMsg = this.chatMessages.some(
+                  (msg) =>
+                    msg.type === 'system' &&
+                    msg.content.includes(
+                      'Resuming previous multi-file chat session'
+                    )
+                );
+
+                if (!alreadyHasResumeMsg) {
+                  this.chatMessages.unshift({
+                    type: 'system',
+                    content: resumeMessage,
+                    timestamp: new Date().toLocaleTimeString(),
+                  });
+                }
+              },
+              error: () => {
+                this.addChatMessage('system', resumeMessage);
+              },
+            });
+        },
+        error: () => {
+          this.addChatMessage(
+            'system',
+            '👋 Multi-File Chat could not be started.'
+          );
+        },
+      });
   }
 
   cancelMultiFileChat() {
@@ -325,46 +388,47 @@ resetFileInput() {
 
   handleChatInput() {
     if (!this.chatInput.trim()) return;
-  
+
     const input = this.chatInput.trim();
     const timestamp = new Date().toLocaleTimeString();
-  
+
     const userMessage: ChatMessage = {
       type: 'user',
       content: input,
-      timestamp
+      timestamp,
     };
     
     this.chatMessages.push(userMessage);
     this.chatInput = '';
-  
+
     let apiCall;
-  
+
     // Memory window: Pick last 5 messages (alternating user-system)
     const memoryWindow = 5;
     const chatHistory = this.chatMessages
-      .slice(-memoryWindow * 2)  // each turn = user + system
-      .filter(m => m.type === 'user' || m.type === 'system')
-      .map(m => ({ role: m.type === 'user' ? 'user' : 'assistant', content: m.content }));
-  
+      .slice(-memoryWindow * 2) // each turn = user + system
+      .filter((m) => m.type === 'user' || m.type === 'system')
+      .map((m) => ({
+        role: m.type === 'user' ? 'user' : 'assistant',
+        content: m.content,
+      }));
+
     // Prepare body depending on mode
     const body: any = {
       question: input,
-      chat_history: chatHistory
+      chat_history: chatHistory,
     };
-  
+
     if (this.selectedMode === 'single') {
       body.vector_id = this.selectedDocumentId;
       apiCall = this.documentService.askQuestion(body);
-  
     } else if (this.selectedMode === 'multi') {
       body.vector_ids = this.selectedVectorIds;
       apiCall = this.documentService.askMultiFileQuestion(body);
-  
     } else if (this.selectedMode === 'global') {
       apiCall = this.documentService.askGlobalQuestion(body);
     }
-  
+
     if (apiCall) {
       this.isLoading = true;
       apiCall.subscribe({
@@ -373,33 +437,37 @@ resetFileInput() {
           const systemMessage: ChatMessage = {
             type: 'system',
             content: res.answer,
-            timestamp: new Date().toLocaleTimeString()
+            timestamp: new Date().toLocaleTimeString(),
           };
           this.chatMessages.push(systemMessage);
+          this.autoSaveChat();  // 💾 Auto-save after assistant reply
         },
         error: (err) => {
           this.isLoading = false;
           const errorMessage: ChatMessage = {
             type: 'error',
             content: err.error?.error || 'Failed to get answer',
-            timestamp: new Date().toLocaleTimeString()
+            timestamp: new Date().toLocaleTimeString(),
           };
           this.chatMessages.push(errorMessage);
         },
       });
     }
   }
-  
+
 
   closeChatbot() {
     this.showChatbot = false;
-    if (
-      this.selectedMode === 'single' &&
-      this.selectedDocumentId &&
-      this.chatMessages.length > 0
-    ) {
+
+    if (this.chatMessages.length === 0) return;
+
+    if (this.selectedMode === 'single' && this.selectedDocumentId) {
       this.documentService
         .saveChatHistory(this.selectedDocumentId, this.chatMessages)
+        .subscribe();
+    } else if (this.selectedMode === 'multi' && this.multiSessionId) {
+      this.documentService
+        .saveMultiChatHistory(this.selectedVectorIds, this.chatMessages)
         .subscribe();
     }
   }
@@ -409,6 +477,10 @@ resetFileInput() {
     if (this.selectedMode === 'single' && this.selectedDocumentId) {
       this.documentService
         .clearChatHistory(this.selectedDocumentId)
+        .subscribe();
+    } else if (this.selectedMode === 'multi' && this.multiSessionId) {
+      this.documentService
+        .clearMultiChatHistory(this.multiSessionId)
         .subscribe();
     }
   }
