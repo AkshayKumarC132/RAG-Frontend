@@ -9,7 +9,11 @@ export class DocumentService {
   constructor(private http: HttpClient) {}
   // private apiUrl = 'http://172.16.17.65:80/rag'; // Update with your backend URL
 
-  private apiUrl = 'http://127.0.0.1:8000/rag'; // Update with your backend URL
+  // private apiUrl = 'http://127.0.0.1:8000/rag'; // Update with your backend URL
+
+  private apiUrl = 'http://103.116.37.147/rag'; // Update with your backend URL
+
+
 
   ingestDocument(file: File): Observable<any> {
     const token = localStorage.getItem('authToken'); // Fetch token here

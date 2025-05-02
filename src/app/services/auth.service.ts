@@ -10,7 +10,10 @@ import { tap } from 'rxjs/operators';
 export class AuthService {
   // private apiUrl = 'http://172.16.17.65:80/rag'; // Update with your backend URL
 
-  private apiUrl = 'http://127.0.0.1:8000/rag'; // Update with your backend URL
+  // private apiUrl = 'http://127.0.0.1:8000/rag'; // Update with your backend URL
+
+  private apiUrl = 'http://103.116.37.147/rag'; // Update with your backend URL
+
   private tokenSubject = new BehaviorSubject<string | null>(null);
   token$ = this.tokenSubject.asObservable();
 
