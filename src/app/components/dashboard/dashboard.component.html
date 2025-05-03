@@ -13,6 +13,39 @@
   <!-- Document List -->
   <div class="card">
     <h3 class="card-title"><span class="global-icon"></span> My Documents</h3>
+
+    <div class="action-buttons">
+      <!-- File Upload -->
+      <input
+        type="file"
+        #fileInput
+        (change)="onFileSelected($event)"
+        class="file-input"
+        id="file-upload"
+      >
+      <label for="file-upload" class="upload-btn">Upload Document</label>
+    
+      <!-- OR separator -->
+      <span class="or-separator">OR</span>
+    
+      <!-- S3 URL Input -->
+      <input
+        type="url"
+        [(ngModel)]="s3FileUrl"
+        placeholder="Paste S3 file URL here"
+        class="s3-input"
+        (input)="onS3UrlChange()"
+      >
+    
+      <!-- Submit Button -->
+      <button 
+        (click)="uploadDocument()" 
+        [disabled]="!canSubmit || isLoading"
+      >
+        Submit
+      </button>
+    </div>
+     
     <div *ngIf="documents.length > 0; else noDocuments" class="table-container">
       <!-- Document Search Bar -->
       <div class="search-bar">
@@ -76,16 +109,7 @@
     <ng-template #noDocuments>
       <p class="no-documents">No documents found. Please upload a document.</p>
     </ng-template>
-    <div class="action-buttons">
-      <input
-        type="file" 
-        #fileInput
-        (change)="onFileSelected($event)"
-        class="file-input"
-        id="file-upload"
-      >
-      <label for="file-upload" class="upload-btn">Upload Document</label>
-    </div>
+       
   </div>
 
   <!-- Chatbot Modal -->

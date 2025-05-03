@@ -29,6 +29,9 @@ interface Document {
 export class DashboardComponent implements OnInit {
   @ViewChild('fileInput', { static: false }) fileInput!: ElementRef;
   selectedFile: File | null = null;
+  s3FileUrl: string = '';
+  canSubmit: boolean = false;
+
   chatInput: string = '';
   chatMessages: ChatMessage[] = [];
   documents: Document[] = [];
@@ -122,57 +125,104 @@ export class DashboardComponent implements OnInit {
   }
 
 
-  onFileSelected(event: any) {
-    this.selectedFile = event.target.files[0];
-    if (this.selectedFile) {
-      this.isLoading = true;
-      this.documentService.ingestDocument(this.selectedFile).subscribe({
-        next: (res) => {
-          this.isLoading = false;
-          this.selectedFile = null;
-          this.fetchDocuments();
+  // onFileSelected(event: any) {
+  //   this.selectedFile = event.target.files[0];
+  //   if (this.selectedFile) {
+  //     this.isLoading = true;
+  //     this.documentService.ingestDocument(this.selectedFile).subscribe({
+  //       next: (res) => {
+  //         this.isLoading = false;
+  //         this.selectedFile = null;
+  //         this.fetchDocuments();
 
-          // Resetting the file input
-          this.resetFileInput();
+  //         // Resetting the file input
+  //         this.resetFileInput();
 
-          // Display success toast notification
-          Swal.fire({
-            position: 'top-end',
-            icon: 'success',
-            title: res.message || 'Document uploaded successfully!',
-            toast: true,
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-          });
+  //         // Display success toast notification
+  //         Swal.fire({
+  //           position: 'top-end',
+  //           icon: 'success',
+  //           title: res.message || 'Document uploaded successfully!',
+  //           toast: true,
+  //           showConfirmButton: false,
+  //           timer: 3000,
+  //           timerProgressBar: true,
+  //         });
 
-        },
-        error: (err) => {
-          this.isLoading = false;
+  //       },
+  //       error: (err) => {
+  //         this.isLoading = false;
 
-          // Resetting the file input
-          this.resetFileInput();
+  //         // Resetting the file input
+  //         this.resetFileInput();
 
-          // Display error toast notification
-          Swal.fire({
-            position: 'top-end',
-            icon: 'error',
-            title: err.error?.error || 'Failed to upload document',
-            toast: true,
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-          });
-        },
-      });
-    }
+  //         // Display error toast notification
+  //         Swal.fire({
+  //           position: 'top-end',
+  //           icon: 'error',
+  //           title: err.error?.error || 'Failed to upload document',
+  //           toast: true,
+  //           showConfirmButton: false,
+  //           timer: 3000,
+  //           timerProgressBar: true,
+  //         });
+  //       },
+  //     });
+  //   }
+  // }
+
+  uploadDocument() {
+    if (!this.canSubmit) return;
+  
+    this.isLoading = true;
+    this.documentService.ingestDocument(this.selectedFile, this.s3FileUrl).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        this.selectedFile = null;
+        this.s3FileUrl = '';
+        this.canSubmit = false;
+        this.resetFileInput();
+        this.fetchDocuments();
+  
+        Swal.fire({
+          position: 'top-end',
+          icon: 'success',
+          title: res.message || 'Document uploaded successfully!',
+          toast: true,
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+        });
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.resetFileInput();
+  
+        Swal.fire({
+          position: 'top-end',
+          icon: 'error',
+          title: err.error?.error || 'Failed to upload document',
+          toast: true,
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+        });
+      },
+    });
   }
-
+  
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0] || null;
+    this.canSubmit = !!this.selectedFile || !!this.s3FileUrl;
+  }
+  
   resetFileInput() {
-    // Reset the file input element
     this.fileInput.nativeElement.value = '';
   }
 
+  onS3UrlChange() {
+    this.canSubmit = !!this.selectedFile || !!this.s3FileUrl.trim();
+  }
 
   deleteDocument(document: Document) {
     Swal.fire({

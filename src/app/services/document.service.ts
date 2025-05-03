@@ -13,12 +13,18 @@ export class DocumentService {
 
   private apiUrl = 'http://103.116.37.147/rag'; // Update with your backend URL
 
-
-
-  ingestDocument(file: File): Observable<any> {
+  ingestDocument(file: File | null, s3Url: string): Observable<any> {
     const token = localStorage.getItem('authToken'); // Fetch token here
+
     const formData = new FormData();
-    formData.append('file', file);
+
+    if (file) {
+      formData.append('file', file);
+    }
+
+    if (s3Url?.trim()) {
+      formData.append('s3_file_url', s3Url);
+    }
     return this.http.post(`${this.apiUrl}/ingest/${token}/`, formData);
   }
 
@@ -76,7 +82,7 @@ export class DocumentService {
     const token = localStorage.getItem('authToken'); // Fetch token here
     return this.http.post(`${this.apiUrl}/multifile-ask/${token}/`, question);
   }
-  
+
   askGlobalQuestion(question: { question: string }): Observable<any> {
     const token = localStorage.getItem('authToken'); // Fetch token here
     return this.http.post(`${this.apiUrl}/global-ask/${token}/`, question);
@@ -86,27 +92,34 @@ export class DocumentService {
     return this.http.get<any>(`${this.apiUrl}/document-alerts/${vectorId}/`);
   }
 
-
   saveMultiChatHistory(vector_ids: string[], history: any[]) {
     const token = localStorage.getItem('authToken'); // Fetch token here
-    return this.http.post<any>(`${this.apiUrl}/chat-history-multifile/${token}/`, {
-      vector_ids,
-      history
-    });
+    return this.http.post<any>(
+      `${this.apiUrl}/chat-history-multifile/${token}/`,
+      {
+        vector_ids,
+        history,
+      }
+    );
   }
-  
+
   getMultiChatHistory(session_id: string) {
     const token = localStorage.getItem('authToken'); // Fetch token here
-    return this.http.get<any>(`${this.apiUrl}/chat-history-multifile/${token}/`, {
-      params: { session_id }
-    });
+    return this.http.get<any>(
+      `${this.apiUrl}/chat-history-multifile/${token}/`,
+      {
+        params: { session_id },
+      }
+    );
   }
-  
+
   clearMultiChatHistory(session_id: string) {
     const token = localStorage.getItem('authToken'); // Fetch token here
-    return this.http.delete<any>(`${this.apiUrl}/chat-history-multifile/${token}/`, {
-      params: { session_id }
-    });
-  }  
-  
+    return this.http.delete<any>(
+      `${this.apiUrl}/chat-history-multifile/${token}/`,
+      {
+        params: { session_id },
+      }
+    );
+  }
 }
