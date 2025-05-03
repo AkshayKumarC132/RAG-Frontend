@@ -40,7 +40,7 @@
       <!-- Submit Button -->
       <button 
         (click)="uploadDocument()" 
-        [disabled]="!canSubmit || isLoading"
+        [disabled]="!s3FileUrl || isLoading || selectedFile"
       >
         Submit
       </button>

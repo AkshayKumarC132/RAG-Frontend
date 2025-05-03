@@ -213,7 +213,12 @@ export class DashboardComponent implements OnInit {
   
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0] || null;
-    this.canSubmit = !!this.selectedFile || !!this.s3FileUrl;
+    this.s3FileUrl = ''; // Clear S3 URL if uploading a file
+    this.canSubmit = !!this.selectedFile;
+
+    if (this.selectedFile) {
+      this.uploadDocument(); // Immediately trigger upload
+    }
   }
   
   resetFileInput() {
